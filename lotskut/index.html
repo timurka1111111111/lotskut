@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Каталог — Лоскут</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header><div class="wrap"><a class="logo" href="index.html">Лоскут</a><nav id="nav"></nav></div></header>
+<main class="wrap" id="app"><section class="hero"><h1>Вещи, у которых есть автор</h1>
+<p>Керамика, текстиль, украшения и другое — напрямую от мастеров. Найдите то, чего нет в магазинах, или откройте свою лавку.</p>
+<a class="btn alt" href="sell.html">Продать своё изделие</a> <a class="btn ghost" href="about.html">Как это работает</a></section>
+<div id="note"></div>
+<div class="tools"><input id="q" type="search" placeholder="Поиск по названию" aria-label="Поиск">
+<select id="sort" aria-label="Сортировка"><option value="new">Сначала новые</option><option value="cheap">Сначала дешёвые</option><option value="dear">Сначала дорогие</option></select></div>
+<div class="chips" id="chips"></div><p class="meta" id="count" style="margin-top:14px"></p>
+<div class="grid" id="grid"><p class="empty">Загружаем…</p></div>
+<section class="sec"><h2>Как купить</h2><div class="steps">
+<div><b>1. Выберите</b><p>Листайте каталог, ищите по названию или категории и сохраняйте понравившееся в избранное.</p></div>
+<div><b>2. Оформите</b><p>Добавьте изделия в корзину, укажите адрес и телефон — заказ сразу уйдёт мастеру.</p></div>
+<div><b>3. Получите</b><p>Мастер упакует и отправит вещь. Все ваши заказы видны в профиле.</p></div></div></section>
+<section class="band"><h2>Вы делаете вещи руками?</h2><p>Зарегистрируйтесь, загрузите фото и цену — изделие появится в каталоге сразу. Комиссии на старте нет.</p>
+<a class="btn alt" href="login.html#up">Открыть свою лавку</a></section></main>
+<footer><div class="wrap foot"><div><b>Лоскут</b><span class="meta">Маркетплейс вещей ручной работы.<br>Продавайте то, что сделали сами.</span></div>
+<div><a href="index.html">Каталог</a><a href="about.html">О нас</a><a href="favorites.html">Избранное</a></div>
+<div><a href="sell.html">Продать</a><a href="login.html#up">Регистрация</a><a href="profile.html">Профиль</a></div></div></footer>
+<div id="toast" role="status"></div>
+<script type="module" src="js/home.js"></script>
+</body>
+</html>

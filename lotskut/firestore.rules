@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // sellerId = uid пользователя или uid-s1, uid-s2 ... (лавки, созданные seed.html)
+    function isMine(sellerId) {
+      return sellerId is string && sellerId.matches(request.auth.uid + '(-s[0-9]+)?');
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if request.auth != null && isMine(request.resource.data.sellerId);
+      allow update: if request.auth != null && isMine(resource.data.sellerId) && isMine(request.resource.data.sellerId);
+      allow delete: if request.auth != null && isMine(resource.data.sellerId);
+    }
+
+    match /orders/{orderId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      // покупатель видит свои покупки, мастер — заказы на свои изделия
+      allow read: if request.auth != null
+        && (resource.data.userId == request.auth.uid
+            || request.auth.uid in resource.data.sellerUids);
+    }
+  }
+}
