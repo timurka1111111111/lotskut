@@ -1,5 +1,5 @@
 import {db, auth, collection, getDocs, deleteDoc, doc, query, where, signOut} from "./firebase.js";
-import {boot, needSetup, $, esc, fmt, img} from "./common.js";
+import {boot, needSetup, $, esc, fmt, img, toast} from "./common.js";
 
 boot(async (user, app) => {
   if (needSetup(app)) return;
@@ -12,29 +12,40 @@ boot(async (user, app) => {
   $("#out").onclick = async () => { await signOut(auth); location.href = "index.html"; };
 
   const byDate = (x, y) => (y.createdAt?.seconds || 0) - (x.createdAt?.seconds || 0);
-  const load = async () => {
-    const [a, b, c] = await Promise.all([
-      // все товары, чей sellerId начинается с моего uid (включая лавки, созданные сидером)
-      getDocs(query(collection(db, "products"), where("sellerId", ">=", user.uid), where("sellerId", "<=", user.uid + "\uf8ff"))),
-      getDocs(query(collection(db, "orders"), where("userId", "==", user.uid))),
-      getDocs(query(collection(db, "orders"), where("sellerUids", "array-contains", user.uid)))]);
-    const mine = a.docs.map(d => ({id: d.id, ...d.data()}));
-    const ord = b.docs.map(d => ({id: d.id, ...d.data()})).sort(byDate);
-    const sales = c.docs.map(d => ({id: d.id, ...d.data()})).sort(byDate);
+  const rows = snap => snap.docs.map(d => ({id: d.id, ...d.data()}));
+  // каждый блок грузится отдельно: если один запрос упал, остальные всё равно покажутся,
+  // а вместо вечного «Загружаем…» будет код ошибки
+  const safe = async (sel, fn) => {
+    try { await fn(); }
+    catch (e) {
+      console.error(sel, e);
+      $(sel).innerHTML = `<p class="meta">Не удалось загрузить (${esc(e.code || e.message)}). Подробности в консоли (F12).</p>`;
+    }
+  };
+  const loadMine = () => safe("#mine", async () => {
+    // все товары, чей sellerId начинается с моего uid (включая лавки, созданные сидером)
+    const mine = rows(await getDocs(query(collection(db, "products"), where("sellerId", ">=", user.uid), where("sellerId", "<=", user.uid + "\uf8ff"))));
     $("#mine").innerHTML = mine.length ? mine.map(p => `<div class="row">${img(p)}
       <div class="grow"><a href="product.html?id=${p.id}"><b>${esc(p.title)}</b></a><p class="meta">${fmt(p.price)}</p></div>
       <button class="btn danger sm" data-del="${p.id}">Удалить</button></div>`).join("")
       : `<p class="meta">Пока пусто. <a href="sell.html"><u>Добавить изделие</u></a></p>`;
+  });
+  const loadSales = () => safe("#sales", async () => {
+    const sales = rows(await getDocs(query(collection(db, "orders"), where("sellerUids", "array-contains", user.uid)))).sort(byDate);
     $("#sales").innerHTML = sales.length ? sales.map(o => `<div class="row"><div class="grow"><b>${fmt(o.total)}</b> · ${esc(o.name)}, ${esc(o.phone)}
       <p class="meta">${o.items.map(i => esc(i.title) + " × " + i.qty).join(", ")}<br>${esc(o.address)}</p></div></div>`).join("")
       : `<p class="meta">Заказов на ваши изделия пока нет.</p>`;
+  });
+  const loadOrders = () => safe("#ord", async () => {
+    const ord = rows(await getDocs(query(collection(db, "orders"), where("userId", "==", user.uid)))).sort(byDate);
     $("#ord").innerHTML = ord.length ? ord.map(o => `<div class="row"><div class="grow"><b>${fmt(o.total)}</b>
       <p class="meta">${o.items.map(i => esc(i.title) + " × " + i.qty).join(", ")}<br>${esc(o.address)}</p></div></div>`).join("")
       : `<p class="meta">Покупок пока нет.</p>`;
-  };
+  });
+  const load = () => Promise.all([loadMine(), loadSales(), loadOrders()]);
   $("#mine").onclick = async e => {
     const id = e.target.dataset.del;
-    if (id && confirm("Удалить этот товар?")) { await deleteDoc(doc(db, "products", id)); load(); }
+    if (id && confirm("Удалить этот товар?")) { try { await deleteDoc(doc(db, "products", id)); } catch (err) { console.error(err); toast("Не удалось удалить: " + (err.code || err.message)); return; } loadMine(); }
   };
   load();
 });
