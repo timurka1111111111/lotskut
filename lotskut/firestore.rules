@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // sellerId = uid пользователя или uid-s1, uid-s2 ... (лавки, созданные seed.html)
+    function isMine(sellerId) {
+      return sellerId is string && sellerId.matches(request.auth.uid + '(-s[0-9]+)?');
+    }
+
+    // админ = у пользователя есть документ admins/<его uid> (создаётся только вручную в консоли Firebase)
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAdmin() || (request.auth != null && isMine(request.resource.data.sellerId));
+      allow update: if isAdmin() || (request.auth != null && isMine(resource.data.sellerId) && isMine(request.resource.data.sellerId));
+      allow delete: if isAdmin() || (request.auth != null && isMine(resource.data.sellerId));
+    }
+
+    match /orders/{orderId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      // покупатель видит свои покупки, мастер — заказы на свои изделия, админ — все
+      allow read: if isAdmin() || (request.auth != null
+        && (resource.data.userId == request.auth.uid
+            || request.auth.uid in resource.data.sellerUids));
+      allow update, delete: if isAdmin();
+    }
+  }
+}

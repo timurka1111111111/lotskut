@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Админка — Лоскут</title><meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 18px}.tabs button{background:#fff;color:var(--ink);border:1px solid var(--line)}.tabs button.on{background:var(--indigo);color:#fff}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}.stats div{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px}.stats b{display:block;font:700 26px Unbounded,sans-serif;margin-top:4px}.row select{width:auto}.st{font-size:13px;padding:2px 8px;border-radius:99px;background:var(--line)}</style></head>
+<body>
+<header><div class="wrap"><a class="logo" href="index.html">Лоскут</a><nav id="nav"></nav></div></header>
+<main class="wrap" id="app"></main>
+<footer><div class="wrap foot"><div><b>Лоскут</b><span class="meta">Маркетплейс вещей ручной работы.<br>Продавайте то, что сделали сами.</span></div>
+<div><a href="index.html">Каталог</a><a href="about.html">О нас</a><a href="favorites.html">Избранное</a></div>
+<div><a href="sell.html">Продать</a><a href="login.html#up">Регистрация</a><a href="profile.html">Профиль</a></div></div></footer>
+<div id="toast" role="status"></div>
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
